@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { pool } from '../config/database.js'
 import { requireAuth } from '../middleware/auth.js'
+import { findCustomerByAccountId } from '../utils/customer.js'
 import { asyncHandler, httpError, parsePositiveInteger } from '../utils/http.js'
 import { repairFields } from '../utils/text.js'
 
@@ -9,12 +10,6 @@ router.use(requireAuth)
 
 const orderNumber = () => `ORD${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
 const allowedPaymentMethods = new Set(['COD', 'BANK_TRANSFER', 'MOMO', 'ZALOPAY'])
-
-const findCustomer = async (connection, userId) => {
-  const [rows] = await connection.execute('SELECT id FROM customers WHERE account_id = ? LIMIT 1', [userId])
-  if (!rows.length) throw httpError(404, 'Không tìm thấy hồ sơ khách hàng')
-  return rows[0]
-}
 
 const getOrder = async (connection, orderId, customerId) => {
   const [orders] = await connection.execute(
@@ -120,7 +115,7 @@ router.post('/', asyncHandler(async (req, res) => {
   const connection = await pool.getConnection()
   try {
     await connection.beginTransaction()
-    const customer = await findCustomer(connection, req.userId)
+    const customer = await findCustomerByAccountId(connection, req.userId)
     const [addresses] = await connection.execute(
       'SELECT * FROM customer_addresses WHERE id = ? AND customer_id = ? LIMIT 1',
       [addressId, customer.id],
@@ -223,7 +218,7 @@ router.post('/', asyncHandler(async (req, res) => {
 }))
 
 router.get('/', asyncHandler(async (req, res) => {
-  const customer = await findCustomer(pool, req.userId)
+  const customer = await findCustomerByAccountId(pool, req.userId)
   const [orders] = await pool.execute(
     `SELECT id, order_number, order_number AS order_code, status, payment_status, shipping_status,
        item_total AS total_price, discount_total AS discount_amount,
@@ -236,7 +231,7 @@ router.get('/', asyncHandler(async (req, res) => {
 }))
 
 router.get('/:orderId', asyncHandler(async (req, res) => {
-  const customer = await findCustomer(pool, req.userId)
+  const customer = await findCustomerByAccountId(pool, req.userId)
   res.json(await getOrder(pool, parsePositiveInteger(req.params.orderId, 0), customer.id))
 }))
 

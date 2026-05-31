@@ -1,19 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { addressFields, createEmptyAddress } from '../constants/checkout'
 import { customerService, orderService } from '../services/api'
 import { useAuthStore, useCartStore } from '../services/store'
 import { formatPrice, imageUrl, repairText } from '../services/catalog'
-
-const emptyAddress = {
-  receiver_name: '',
-  receiver_phone: '',
-  province_name: '',
-  district_name: '',
-  ward_name: '',
-  address_line: '',
-  is_default: false,
-}
 
 export default function Cart() {
   const { isAuthenticated, user } = useAuthStore((state) => ({ isAuthenticated: state.isAuthenticated, user: state.user }))
@@ -24,7 +15,7 @@ export default function Cart() {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [addresses, setAddresses] = useState([])
   const [selectedAddressId, setSelectedAddressId] = useState('')
-  const [addressForm, setAddressForm] = useState(emptyAddress)
+  const [addressForm, setAddressForm] = useState(createEmptyAddress)
   const [showAddressForm, setShowAddressForm] = useState(false)
   const [notes, setNotes] = useState('')
   const [discountCode, setDiscountCode] = useState('')
@@ -78,7 +69,7 @@ export default function Cart() {
       setError('')
       const response = await customerService.createAddress(addressForm)
       await loadAddresses(response.data.id)
-      setAddressForm(emptyAddress)
+      setAddressForm(createEmptyAddress())
       setShowAddressForm(false)
     } catch (requestError) {
       setError(requestError.response?.data?.detail || 'Không thể lưu địa chỉ giao hàng.')
@@ -245,14 +236,7 @@ export default function Cart() {
               <form onSubmit={saveAddress} className="mt-5 rounded border border-gray-200 bg-gray-50 p-4">
                 <h3 className="font-black text-[#14315f]">Thêm địa chỉ mới</h3>
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  {[
-                    ['receiver_name', 'Tên người nhận'],
-                    ['receiver_phone', 'Số điện thoại'],
-                    ['province_name', 'Tỉnh/Thành phố'],
-                    ['district_name', 'Quận/Huyện'],
-                    ['ward_name', 'Phường/Xã'],
-                    ['address_line', 'Địa chỉ cụ thể'],
-                  ].map(([field, placeholder]) => (
+                  {addressFields.map(([field, placeholder]) => (
                     <input key={field} required value={addressForm[field]} onChange={(event) => setAddressForm((current) => ({ ...current, [field]: event.target.value }))} placeholder={placeholder} className="rounded border border-gray-200 px-4 py-3" />
                   ))}
                 </div>

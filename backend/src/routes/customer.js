@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { pool } from '../config/database.js'
 import { requireAuth } from '../middleware/auth.js'
+import { findCustomerByAccountId } from '../utils/customer.js'
 import { asyncHandler, httpError, parsePositiveInteger } from '../utils/http.js'
 
 const router = Router()
@@ -13,14 +14,8 @@ const requiredText = (value, label, maxLength) => {
   return result
 }
 
-const findCustomer = async (connection, userId) => {
-  const [rows] = await connection.execute('SELECT id FROM customers WHERE account_id = ? LIMIT 1', [userId])
-  if (!rows.length) throw httpError(404, 'Không tìm thấy hồ sơ khách hàng')
-  return rows[0]
-}
-
 router.get('/addresses', asyncHandler(async (req, res) => {
-  const customer = await findCustomer(pool, req.userId)
+  const customer = await findCustomerByAccountId(pool, req.userId)
   const [addresses] = await pool.execute(
     `SELECT id, receiver_name, receiver_phone, province_name, district_name,
        ward_name, address_line, is_default, created_at
@@ -33,7 +28,7 @@ router.get('/addresses', asyncHandler(async (req, res) => {
 }))
 
 router.post('/addresses', asyncHandler(async (req, res) => {
-  const customer = await findCustomer(pool, req.userId)
+  const customer = await findCustomerByAccountId(pool, req.userId)
   const address = {
     receiverName: requiredText(req.body.receiver_name, 'Tên người nhận', 255),
     receiverPhone: requiredText(req.body.receiver_phone, 'Số điện thoại', 30),
@@ -77,7 +72,7 @@ router.post('/addresses', asyncHandler(async (req, res) => {
 router.delete('/addresses/:addressId', asyncHandler(async (req, res) => {
   const addressId = parsePositiveInteger(req.params.addressId, 0)
   if (!addressId) throw httpError(400, 'Mã địa chỉ không hợp lệ')
-  const customer = await findCustomer(pool, req.userId)
+  const customer = await findCustomerByAccountId(pool, req.userId)
   const [result] = await pool.execute(
     'DELETE FROM customer_addresses WHERE id = ? AND customer_id = ?',
     [addressId, customer.id],

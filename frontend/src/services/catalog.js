@@ -10,25 +10,6 @@ export const categories = [
   { id: 12, name: 'Hàng mới về', label: 'Hàng mới về' },
 ]
 
-export const menuGroups = [
-  {
-    title: 'Nam',
-    items: ['Áo polo nam', 'Áo thun nam', 'Áo sơ mi nam', 'Quần kaki nam', 'Quần jean nam'],
-  },
-  {
-    title: 'Nữ',
-    items: ['Áo polo nữ', 'Áo chống nắng nữ', 'Đầm và chân váy', 'Quần nữ', 'Đồ mặc nhà'],
-  },
-  {
-    title: 'Trẻ em',
-    items: ['Áo trẻ em', 'Quần trẻ em', 'Đồ bộ trẻ em', 'Đầm bé gái', 'Phụ kiện'],
-  },
-  {
-    title: 'Bộ sưu tập',
-    items: ['Everyday Basic', 'Business Casual', 'Sport nhẹ tênh', 'Hàng mới về', 'Ưu đãi -50%'],
-  },
-]
-
 export const fallbackProducts = [
   {
     id: 1,

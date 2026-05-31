@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import ProductCard from '../components/ProductCard'
 import { productService } from '../services/api'
-import { fallbackProducts, formatPrice, imageUrl, normalizeProduct } from '../services/catalog'
+import { fallbackProducts, imageUrl, normalizeProduct } from '../services/catalog'
 
 const categoryTiles = [
   { title: 'Thời trang nam', href: '/products?category_id=1', image: '/uploads/products/ao-polo-nam-regular.webp' },
@@ -10,37 +11,6 @@ const categoryTiles = [
   { title: 'Trẻ em', href: '/products?category_id=3', image: '/uploads/products/ao-polo-nu-regular.webp' },
   { title: 'Hàng mới về', href: '/products?category_id=12', image: '/uploads/products/ao-polo-nam-slim.webp' },
 ]
-
-function ProductCard({ product }) {
-  return (
-    <a href={`/products/${product.id}`} className="group block bg-white">
-      <div className="relative aspect-[3/4] overflow-hidden rounded">
-        <img
-          src={imageUrl(product.image)}
-          alt={product.name}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-        />
-        {product.discount > 0 && <span className="absolute left-3 top-3 rounded-sm bg-red-600 px-2 py-1 text-xs font-bold text-white">-{product.discount}%</span>}
-      </div>
-      <div className="pt-3">
-        <p className="line-clamp-2 min-h-[44px] text-[15px] font-semibold text-gray-800">{product.name}</p>
-        <div className="mt-2 flex items-baseline gap-2">
-          <span className="font-bold text-red-600">{formatPrice(product.price)}</span>
-          <span className="text-sm text-gray-400 line-through">{formatPrice(product.compare_at_price)}</span>
-        </div>
-        <div className="mt-3 flex gap-2">
-          {product.colors.map((color) => (
-            <span
-              key={color}
-              className="h-4 w-4 rounded-full border border-gray-300"
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
-      </div>
-    </a>
-  )
-}
 
 export default function Home() {
   const [products, setProducts] = useState(fallbackProducts)

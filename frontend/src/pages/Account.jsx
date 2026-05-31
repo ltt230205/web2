@@ -1,19 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { addressFields, createEmptyAddress } from '../constants/checkout'
 import { authService, customerService, orderService } from '../services/api'
 import { formatPrice } from '../services/catalog'
 import { useAuthStore } from '../services/store'
-
-const emptyAddress = {
-  receiver_name: '',
-  receiver_phone: '',
-  province_name: '',
-  district_name: '',
-  ward_name: '',
-  address_line: '',
-  is_default: false,
-}
 
 const statusLabels = {
   PENDING: 'Chờ xác nhận',
@@ -172,7 +163,7 @@ export function AccountOrders() {
 
 export function AccountAddresses() {
   const [addresses, setAddresses] = useState([])
-  const [form, setForm] = useState(emptyAddress)
+  const [form, setForm] = useState(createEmptyAddress)
   const [error, setError] = useState('')
 
   const loadAddresses = () => {
@@ -190,7 +181,7 @@ export function AccountAddresses() {
     try {
       setError('')
       await customerService.createAddress(form)
-      setForm(emptyAddress)
+      setForm(createEmptyAddress())
       loadAddresses()
     } catch (requestError) {
       setError(requestError.response?.data?.detail || 'Không thể lưu địa chỉ.')
@@ -215,14 +206,7 @@ export function AccountAddresses() {
         <form onSubmit={addAddress} className="rounded border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-black text-[#14315f]">Thêm địa chỉ mới</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {[
-              ['receiver_name', 'Tên người nhận'],
-              ['receiver_phone', 'Số điện thoại'],
-              ['province_name', 'Tỉnh/Thành phố'],
-              ['district_name', 'Quận/Huyện'],
-              ['ward_name', 'Phường/Xã'],
-              ['address_line', 'Địa chỉ cụ thể'],
-            ].map(([field, placeholder]) => (
+            {addressFields.map(([field, placeholder]) => (
               <input key={field} required value={form[field]} onChange={(event) => setForm((current) => ({ ...current, [field]: event.target.value }))} placeholder={placeholder} className="min-h-[48px] rounded border border-gray-200 px-4 outline-none focus:border-[#14315f]" />
             ))}
           </div>

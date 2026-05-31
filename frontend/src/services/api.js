@@ -9,7 +9,6 @@ const api = axios.create({
   },
 })
 
-// Add token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
   if (token) {
@@ -18,13 +17,12 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Handle token refresh
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
+  (error) => {
+    const isLoginRequest = error.config?.url === '/auth/login'
+    if (error.response?.status === 401 && !isLoginRequest) {
+      ['access_token', 'refresh_token', 'current_user'].forEach((key) => localStorage.removeItem(key))
       window.location.href = '/login'
     }
     return Promise.reject(error)
