@@ -49,3 +49,9 @@ uploads/*
 
 # Docker
 docker-compose.override.yml
+
+
+*.pyc
+__pycache__/*
+
+docs/*
